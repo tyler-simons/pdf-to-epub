@@ -1,0 +1,24 @@
+name: Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: vercel/package-lock.json
+      - run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest tests -q
+      - run: npm ci
+        working-directory: vercel
+      - run: node --test tests/node/*.test.mjs
+      - run: npm run build
+        working-directory: vercel

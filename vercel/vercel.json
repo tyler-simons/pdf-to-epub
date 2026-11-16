@@ -1,0 +1,9 @@
+{
+  "$schema":"https://openapi.vercel.sh/vercel.json",
+  "framework":"nextjs",
+  "functions":{
+    "app/api/queue/route.js":{"maxDuration":300,"experimentalTriggers":[{"type":"queue/v2beta","topic":"leaf-convert","maxDeliveries":5}]},
+    "app/api/[[...path]]/route.js":{"maxDuration":30}
+  },
+  "crons":[{"path":"/api/cleanup","schedule":"0 3 * * *"}]
+}

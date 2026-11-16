@@ -1,0 +1,28 @@
+{
+  "name": "leaf-vercel",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build-static.mjs && next build",
+    "dev": "node build-static.mjs && next dev",
+    "test": "node --test ../tests/node/*.test.mjs"
+  },
+  "dependencies": {
+    "@upstash/redis": "1.41.0",
+    "@vercel/blob": "2.9.0",
+    "@vercel/queue": "0.11.0",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  },
+  "overrides": {
+    "zod": "^4.6.6",
+    "minimatch": "^11.0.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,14 @@
+data
+.env
+.env.*
+.git
+.venv
+__pycache__
+.pytest_cache
+tests
+*.pdf
+*.epub
+vercel/node_modules
+vercel/.next
+vercel/.vercel
+vercel/public

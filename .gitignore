@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+data/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+*.pdf
+*.epub
+*.sqlite3*
+node_modules/
+.next/
+.vercel/
+vercel/public/
+*.log

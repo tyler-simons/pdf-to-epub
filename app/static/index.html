@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F3F9FA">
+  <title>PDF to EPUB</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="PDF to EPUB home">PDF <span aria-hidden="true">→</span> EPUB</a>
+  </header>
+
+  <main class="shell">
+    <section class="intro" aria-labelledby="page-title">
+      <h1 id="page-title">PDF to EPUB</h1>
+      <p class="lede">Make your PDFs easier to read.</p>
+    </section>
+
+    <section class="workspace" aria-label="PDF conversion">
+      <div id="upload-panel" class="upload-panel">
+        <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-describedby="upload-help">
+          <input id="file-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" aria-label="Choose a PDF file">
+          <span class="upload-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 32V8m0 0-9 9m9-9 9 9M9 29v10h30V29"/></svg></span>
+          <span class="drop-title">Drop a PDF to get started</span>
+          <span class="drop-subtitle">or <span class="text-link">choose a file</span></span>
+          <span id="upload-help" class="microcopy">PDF files only · Private storage · Deleted after 24 hours</span>
+        </div>
+
+        <div class="form-row">
+          <label class="field-label" for="title-input">Book title <span class="optional">Optional</span></label>
+          <input id="title-input" class="text-input" type="text" maxlength="160" placeholder="A title for your ebook" autocomplete="off">
+        </div>
+        <div class="selected-file hidden" id="selected-file" aria-live="polite"></div>
+        <div id="challenge-container" class="challenge-container hidden" aria-label="Browser verification"></div>
+        <div class="challenge-feedback"><p id="challenge-status" class="challenge-status" role="status" aria-live="polite"></p><button id="challenge-retry" class="quiet-button hidden" type="button">Try verification again</button></div>
+        <button id="convert-button" class="button button-primary" disabled>Convert PDF to EPUB</button>
+        <p id="config-note" class="under-button">Private storage · Files deleted after 24 hours.</p>
+        <p id="ai-note" class="privacy-note hidden">AI cleanup is on. Selected text may be sent to OpenAI.</p>
+      </div>
+
+      <section id="progress-panel" class="result-panel hidden" aria-live="polite" aria-labelledby="progress-title">
+        <div class="panel-topline"><span class="eyebrow">YOUR BOOK</span><button id="reset-progress" class="quiet-button">Start over</button></div>
+        <div class="progress-book"><div class="book-art" aria-hidden="true"><span>EPUB</span></div><div><h2 id="progress-title">Preparing your book</h2><p id="progress-detail" class="muted">Your file is on its way.</p></div></div>
+        <div class="progress-track" role="progressbar" aria-label="Conversion progress"><span id="progress-fill"></span></div>
+        <p id="status-line" class="status-line">Waiting to begin…</p>
+        <div id="error-box" class="error-box hidden" role="alert"></div>
+      </section>
+
+      <section id="ready-panel" class="result-panel hidden" aria-labelledby="ready-title">
+        <div class="panel-topline"><span class="eyebrow">READY TO READ</span><button id="reset-ready" class="quiet-button">Convert another</button></div>
+        <div class="ready-heading"><div class="book-art book-art-ready" aria-hidden="true"><span>EPUB</span></div><div><p class="eyebrow">YOUR EPUB IS READY</p><h2 id="ready-title">Your EPUB is ready</h2><p id="expiry-line" class="muted">Available for a limited time.</p></div></div>
+        <div id="report" class="report hidden"></div>
+        <div id="warning-note" class="warning-note hidden"></div>
+        <button id="download-button" class="button button-primary">Download EPUB <span aria-hidden="true">↓</span></button>
+        <button id="preview-button" class="button button-secondary">Preview your book</button>
+        <p class="under-button">Keep your download somewhere safe. This link expires with your file.</p>
+      </section>
+
+      <section id="reader-panel" class="reader-panel hidden" aria-labelledby="reader-title">
+        <div class="reader-toolbar"><button id="back-to-book" class="quiet-button">← Back to book</button><div class="reader-controls"><button id="font-smaller" class="reader-control" aria-label="Decrease text size">A−</button><button id="font-larger" class="reader-control" aria-label="Increase text size">A+</button><button id="theme-toggle" class="reader-control" aria-label="Toggle reading theme">◐</button></div></div>
+        <article id="reader-content" class="reader-content"><p class="eyebrow">PREVIEW</p><h2 id="reader-title">Your book</h2><div id="reader-body" class="reader-body"></div></article>
+      </section>
+    </section>
+
+    <p class="footnote"><span aria-hidden="true">✳</span> Best with text-based PDFs. Complex layouts and images may not carry over exactly.</p>
+  </main>
+
+  <footer class="footer"><span>Made by Tyler Simons</span><span>Files are private and automatically deleted after 24 hours.</span></footer>
+</body>
+</html>
