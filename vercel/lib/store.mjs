@@ -275,7 +275,11 @@ export class Store {
     const numberFields = ['created_at','expires_at','upload_until','expected_size','reservation_seconds',
       'actual_seconds','ai_reserved','ai_charge','claim_deadline','started_at','finished_at','max_pages'];
     const boolFields = ['upload_authorized','ai_known','pending_active','ai_enabled'];
-    const result = { ...raw };
+    // Upstash returns alternating field/value entries when automatic
+    // deserialization is disabled; local Redis adapters may return an object.
+    const result = Array.isArray(raw)
+      ? Object.fromEntries(Array.from({ length: raw.length / 2 }, (_, i) => [raw[i * 2], raw[i * 2 + 1]]))
+      : { ...raw };
     for (const key of numberFields) if (result[key] !== undefined && result[key] !== '') result[key] = Number(result[key]);
     for (const key of boolFields) result[key] = result[key] === '1';
     for (const key of ['report','preview']) {

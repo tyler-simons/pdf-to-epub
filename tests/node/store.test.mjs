@@ -209,3 +209,13 @@ test('pending metadata survives outages until cleanup releases reservations', {s
   assert.ok(await redis.request({op:'ttl',key:store.key('job:'+job.id)})>0);
  });
 });
+
+test('reads raw Upstash hash entries with deserialization disabled', async()=>{
+ const store=new Store({eval:async()=>{},hgetall:async()=>['id','abc','input_path','jobs/abc/source.pdf','token_hash','digest','expected_size','123','ai_enabled','0','reservation_seconds','240']});
+ const job=await store.get('abc');
+ assert.equal(job.input_path,'jobs/abc/source.pdf');
+ assert.equal(job.token_hash,'digest');
+ assert.equal(job.expected_size,123);
+ assert.equal(job.ai_enabled,false);
+ assert.equal(job.max_seconds,240);
+});
