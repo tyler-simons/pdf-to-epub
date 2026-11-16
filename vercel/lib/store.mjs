@@ -42,7 +42,7 @@ redis.call('HSET',jobKey,'id',id,'token_hash',tokenHash,'owner_hash',ownerHash,'
  'actual_seconds','','ai_reserved',reserve,'ai_charge','','ai_known','0','pending_active','1',
  'claim_token','','claim_deadline','','error','','report','','preview','',
  'ai_enabled',(aiWanted==1 and reserve>0) and '1' or '0','max_pages',ARGV[21])
-redis.call('EXPIRE',jobKey,retention+604800)
+-- Pending metadata must outlive outages; cleanup sets TTL only after releasing reservations.
 redis.call('ZADD',KEYS[10],expires,id); redis.call('ZADD',KEYS[11],uploadUntil,id)
 redis.call('INCR',KEYS[2]); redis.call('INCR',KEYS[3]); redis.call('EXPIRE',KEYS[3],259200)
 redis.call('INCR',KEYS[4]); redis.call('EXPIRE',KEYS[4],259200)

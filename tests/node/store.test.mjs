@@ -16,6 +16,7 @@ for line in sys.stdin:
    value=r.eval(q['script'],len(q['keys']),*q['keys'],*q['args'])
   elif q['op']=='hgetall': value=r.hgetall(q['key'])
   elif q['op']=='get': value=r.get(q['key'])
+  elif q['op']=='ttl': value=r.ttl(q['key'])
   else: raise ValueError('unknown operation')
   print(json.dumps({'ok':True,'value':value}),flush=True)
  except Exception as e:
@@ -197,4 +198,14 @@ test('deleting an unclaimed uploading job releases pending, AI, and compute rese
 
 test('empty cleanup returns an array', {skip:!hasLua}, async()=>{
  await withStore({},async store=>{assert.deepEqual(await store.cleanup(),[])});
+});
+
+
+test('pending metadata survives outages until cleanup releases reservations', {skip:!hasLua},async()=>{
+ await withStore({},async(store,redis)=>{
+  const now=1800000000000;const job=await store.createJob(jobInput('outage',now));
+  assert.equal(await redis.request({op:'ttl',key:store.key('job:'+job.id)}),-1);
+  await store.cleanup({now:now+86400001});
+  assert.ok(await redis.request({op:'ttl',key:store.key('job:'+job.id)})>0);
+ });
 });
