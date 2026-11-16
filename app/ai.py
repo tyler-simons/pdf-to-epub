@@ -187,6 +187,10 @@ def cleanup_epub(epub_path: Path, budget, job_id: str, api_key: str,
     calls = 1
     try:
         response = (transport or _request)(payload, api_key) if transport else _request(payload, api_key)
+    except urllib.error.HTTPError as exc:
+        # Report only the status, never provider text that could echo a secret.
+        return {"enabled": True, "calls": calls, "corrections": 0,
+                "warnings": [f"AI provider rejected the request (HTTP {exc.code}); reservation retained"]}
     except Exception as exc:
         # A timeout or transport failure may occur after provider processing.
         return {"enabled": True, "calls": calls, "corrections": 0,
