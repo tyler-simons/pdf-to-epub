@@ -25,6 +25,37 @@ def esc(value: str) -> str:
     return html.escape(value, quote=False)
 
 
+def _reading_order(items, page_width):
+    """Read clear two-column bands down each column, preserving spanning blocks."""
+    by_position = lambda item: (item[0][1], item[0][0])
+    middle = page_width / 2
+    text = [item for item in items if item[2]]
+    left = [item for item in text if item[0][2] <= middle + 12]
+    right = [item for item in text if item[0][0] >= middle - 12]
+    if len(left) < 2 or len(right) < 2:
+        return sorted(items, key=by_position)
+    left_edge = max(item[0][2] for item in left)
+    right_edge = min(item[0][0] for item in right)
+    overlap = min(max(item[0][3] for item in left), max(item[0][3] for item in right)) - max(
+        min(item[0][1] for item in left), min(item[0][1] for item in right))
+    # Font bounding boxes can spill a few points into a visually clear gutter.
+    if right_edge - left_edge < -4 or overlap < 24:
+        return sorted(items, key=by_position)
+    split = right_edge
+    is_spanning = lambda item: item[0][0] < split and item[0][2] > split + 4
+    spanning = sorted([item for item in items if is_spanning(item)], key=by_position)
+    remaining = [item for item in items if not is_spanning(item)]
+    result = []
+    for span in [*spanning, None]:
+        band = [item for item in remaining if span is None or item[0][1] < span[0][1]]
+        result.extend(sorted([item for item in band if item[0][0] < split], key=by_position))
+        result.extend(sorted([item for item in band if item[0][0] >= split], key=by_position))
+        remaining = [item for item in remaining if item not in band]
+        if span is not None:
+            result.append(span)
+    return result
+
+
 def convert(source: Path, output: Path, report: Path, max_pages: int = 1000, title: str | None = None) -> dict:
     source, output, report = Path(source), Path(output), Path(report)
     if max_pages < 1:
@@ -109,15 +140,15 @@ def convert(source: Path, output: Path, report: Path, max_pages: int = 1000, tit
                                 spans.append(txt)
                             para.append("".join(spans))
                         text = " ".join(para).strip()
-                        if text: ordered.append((block["bbox"][1], block["bbox"][0], f"<p>{text}</p>"))
+                        if text: ordered.append((block["bbox"], f"<p>{text}</p>", True))
                     for block in (b for b in blocks if b.get("type") == 1):
                         if block.get("type") == 1 and block.get("image"):
                             ext = block.get("ext", "png").lower()
                             if ext not in {"png", "jpg", "jpeg", "webp"}: ext = "png"
                             name = f"p{index+1}-img{len(images)+1}.{ext}"
                             (image_dir / name).write_bytes(block["image"]); images.append(name)
-                            ordered.append((block["bbox"][1], block["bbox"][0], f'<figure><img src="../images/{name}" alt="Illustration on page {index+1}"/></figure>'))
-                    body.extend(item[2] for item in sorted(ordered))
+                            ordered.append((block["bbox"], f'<figure><img src="../images/{name}" alt="Illustration on page {index+1}"/></figure>', False))
+                    body.extend(item[1] for item in _reading_order(ordered, page.rect.width))
                 bodies.append("\n".join(body) or "<p></p>")
 
             # Rejoin obvious PDF line wraps split at a page boundary. Keep the

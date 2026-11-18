@@ -4,7 +4,7 @@ Rebind's reference deployment is https://pdf.tylersimons.com. This file describe
 
 ## Automated checks
 
-The local suite currently has 47 Python tests and 15 Node tests. It covers generated digital/scanned PDFs, equations and tables, archive/XML/reference validation, authenticated private downloads, expiry, admission limits, concurrent durable budget reservations, Redis Lua state transitions, worker claim/idempotency, subprocess timeouts, safe error propagation, and simulated AI outcomes. See README.md for commands.
+The local suite currently has 49 Python tests and 15 Node tests. It covers generated digital/scanned PDFs, equations and tables, archive/XML/reference validation, authenticated private downloads, expiry, admission limits, concurrent durable budget reservations, Redis Lua state transitions, worker claim/idempotency, subprocess timeouts, safe error propagation, and simulated AI outcomes. See README.md for commands.
 
 The Vercel gateway production build passes. A workflow template is provided in docs/ci; it is not currently an active GitHub Actions workflow.
 

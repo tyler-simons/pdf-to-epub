@@ -15,3 +15,6 @@ node_modules/
 .vercel/
 vercel/public/
 *.log
+
+# Public compatibility corpus: never package third-party inputs or generated books.
+.corpus-cache/

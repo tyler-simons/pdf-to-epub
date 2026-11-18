@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "discovered_on": "2026-11-17",
+  "sources": [
+    {
+      "id": "w3c-columns-word",
+      "title": "Two columns (Word)",
+      "category": "columns",
+      "url": "https://www.w3.org/WAI/WCAG21/working-examples/pdf-reading-order/reading-order-2cols-word.pdf",
+      "sha256": "9a3a38c444fa165d2b33af41fb2c90502c52def5c560f5d543afe01d937d6e80"
+    },
+    {
+      "id": "w3c-columns-oo",
+      "title": "Two columns (OpenOffice)",
+      "category": "columns",
+      "url": "https://www.w3.org/WAI/WCAG21/working-examples/pdf-reading-order/reading-order-2cols-oo.pdf",
+      "sha256": "0c8cd5c891e4b39f85f3f3ebea00c8aa56db35ce1f6d04f1ff263dac43e1ff3a"
+    },
+    {
+      "id": "w3c-reading-order",
+      "title": "Tab and reading order",
+      "category": "form",
+      "url": "https://www.w3.org/WAI/WCAG21/working-examples/pdf-reading-order/reading-order.pdf",
+      "sha256": "ac028899fb8fc4a828c7ad96d55712a7116c5719a29b00c138fce6be53a757cf"
+    },
+    {
+      "id": "w3c-ocr",
+      "title": "OCR recipe",
+      "category": "ocr-text-layer",
+      "url": "https://www.w3.org/WAI/WCAG21/working-examples/pdf-ocr/ocr-example.pdf",
+      "sha256": "7a161be656c7e82986a1959890eadbdcd0876e15e01b28fd00900190de15eed5"
+    },
+    {
+      "id": "w3c-ocr-tagged",
+      "title": "Tagged OCR recipe",
+      "category": "ocr-text-layer",
+      "url": "https://www.w3.org/WAI/WCAG21/working-examples/pdf-ocr/ocr-example-tagged.pdf",
+      "sha256": "99fc320c2fe78e9aea09dcecdf39aa788697beca2410dd85d82ca5819674df14"
+    },
+    {
+      "id": "w3c-form",
+      "title": "Accessible form",
+      "category": "form",
+      "url": "https://www.w3.org/WAI/WCAG21/working-examples/pdf-name-role-value-form-fields/form.pdf",
+      "sha256": "9f91e09d8f1b66553ed928e0d1053b32aa8fd43f5bdc9534f4a1183a2d96fa36"
+    },
+    {
+      "id": "irs-fw4",
+      "title": "IRS W-4 English",
+      "category": "multilingual-form",
+      "url": "https://www.irs.gov/pub/irs-pdf/fw4.pdf",
+      "sha256": "92444d8856ce55d9e25dca8b6d1420634fc68b11e1ab1f760916ea29ddd312b2"
+    },
+    {
+      "id": "irs-fw4sp",
+      "title": "IRS W-4 Spanish",
+      "category": "multilingual-form",
+      "url": "https://www.irs.gov/pub/irs-pdf/fw4sp.pdf",
+      "sha256": "ecf4480b92488a14a5cee7b8083916ae0a786e0c8cef89c624cb6ff113914c6e"
+    },
+    {
+      "id": "irs-fw4ko",
+      "title": "IRS W-4 Korean",
+      "category": "multilingual-form",
+      "url": "https://www.irs.gov/pub/irs-pdf/fw4ko.pdf",
+      "sha256": "7af86fbc1629ef0eb87ce68ea5988460453428eaf248e8b2b20c85e395091f3f"
+    },
+    {
+      "id": "irs-fw4ru",
+      "title": "IRS W-4 Russian",
+      "category": "multilingual-form",
+      "url": "https://www.irs.gov/pub/irs-pdf/fw4ru.pdf",
+      "sha256": "98c4078ff584c64e74a49e90e653a2dc63cd6066be8605c55577523298013972"
+    },
+    {
+      "id": "arxiv-attention",
+      "title": "Attention Is All You Need v7",
+      "category": "math-tables-two-columns",
+      "url": "https://arxiv.org/pdf/1706.03762v7",
+      "sha256": "bdfaa68d8984f0dc02beaca527b76f207d99b666d31d1da728ee0728182df697"
+    },
+    {
+      "id": "nasa-apollo",
+      "title": "Operation LION Apollo 12 report",
+      "category": "historic-report",
+      "url": "https://ntrs.nasa.gov/api/citations/19700020471/downloads/19700020471.pdf",
+      "sha256": "4e80c5a6e5449db413f5a67f0102934fde2f428b3b9d028c46ca4bc9d23f2963"
+    },
+    {
+      "id": "nasa-thermal",
+      "title": "Spacecraft thermal control report",
+      "category": "historic-report",
+      "url": "https://ntrs.nasa.gov/api/citations/19660015096/downloads/19660015096.pdf",
+      "sha256": "5c73b8a3bcb62ff616e10aee64554e9e6008012924e15430c3a54a495ce8e9a3"
+    }
+  ]
+}

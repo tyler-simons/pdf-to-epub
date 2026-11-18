@@ -70,6 +70,15 @@ node --test ../tests/node/*.test.mjs
 npm run build
 ```
 
+To run the opt-in public PDF compatibility suite (downloads stay in an ignored cache):
+
+```sh
+python scripts/run_corpus.py
+python scripts/run_corpus_fixtures.py
+```
+
+Results and quality limits are recorded in [docs/corpus-results.md](docs/corpus-results.md). A passing EPUB structure check does not guarantee correct reading order or reflow.
+
 Node tests execute Redis Lua through a local fakeredis/Lua bridge. Tests generate their own PDF fixtures; user books and credentials are not bundled. A GitHub Actions workflow template is included in `docs/ci/` for maintainers to enable.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines and [docs/verification.md](docs/verification.md) for the scope of verification.

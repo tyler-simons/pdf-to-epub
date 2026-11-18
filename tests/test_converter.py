@@ -135,3 +135,30 @@ def test_scanned_text_uses_local_ocr_when_available(tmp_path):
     target=tmp_path/'scan.epub';result=convert(source,target,tmp_path/'scan.json')
     assert result['ocr_pages']==1
     with zipfile.ZipFile(target) as z:assert b'Reading makes' in z.read('EPUB/text/p1.xhtml')
+
+
+def test_two_columns_read_down_each_column_with_spanning_heading(tmp_path):
+    source = tmp_path / 'columns.pdf'
+    doc = fitz.open(); page = doc.new_page(width=600, height=800)
+    page.insert_text((40,40), 'A heading across the entire page width for both columns', fontsize=18)
+    page.insert_text((40,100), 'Left column first paragraph.')
+    page.insert_text((40,300), 'Left column last paragraph.')
+    page.insert_text((330,100), 'Right column first paragraph.')
+    page.insert_text((330,200), 'Right column last paragraph.')
+    doc.save(source);doc.close()
+    output = tmp_path / 'columns.epub'
+    convert(source, output, tmp_path / 'report.json')
+    with zipfile.ZipFile(output) as z:
+        text = ''.join(ET.fromstring(z.read('EPUB/text/p1.xhtml')).itertext())
+    assert text.index('heading across') < text.index('Left column first')
+    assert text.index('Left column last') < text.index('Right column first')
+    assert text.index('Right column first') < text.index('Right column last')
+
+
+def test_columns_allow_small_font_bbox_overlap():
+    from app.converter import _reading_order
+    items = [((57,69,307,95),'left first',True),
+             ((57,372,280,386),'left last',True),
+             ((306,69,520,90),'right first',True),
+             ((327,228,520,255),'right last',True)]
+    assert [item[1] for item in _reading_order(items,595)] == ['left first','left last','right first','right last']
