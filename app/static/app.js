@@ -288,6 +288,33 @@
     const date = new Date(typeof value === 'number' ? value * 1000 : value); if (Number.isNaN(date.getTime())) return '';
     return `Available until ${new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date)}.`;
   }
+  function presentWarnings(target, warnings) {
+    target.replaceChildren();
+    const groups = new Map();
+    warnings.filter((item) => typeof item === 'string').forEach((warning) => {
+      const match = warning.match(/^Page (\d+):\s*(.*)$/);
+      const message = match ? match[2] : warning;
+      if (!groups.has(message)) groups.set(message, []);
+      if (match) groups.get(message).push(Number(match[1]));
+    });
+    target.classList.toggle('hidden', groups.size === 0);
+    if (!groups.size) return;
+    const summary = document.createElement('p');
+    summary.textContent = 'Your EPUB is ready. Some text or layouts may need a quick check.';
+    const details = document.createElement('details');
+    const label = document.createElement('summary'); label.textContent = 'View conversion notes';
+    const list = document.createElement('ul');
+    groups.forEach((pages, message) => {
+      const item = document.createElement('li');
+      const description = message.includes('possible broken ligatures')
+        ? 'Some joined letters, such as fi or fl, may not have copied correctly from the PDF. Check these pages in the preview.'
+        : message;
+      const unique = [...new Set(pages)].sort((a, b) => a - b);
+      item.textContent = description + (unique.length ? ` (${unique.length === 1 ? 'Page' : 'Pages'} ${unique.join(', ')})` : '');
+      list.append(item);
+    });
+    details.append(label, list); target.append(summary, details);
+  }
   function presentReady(job) {
     show(els.ready); els.readyTitle.textContent = job.title || els.title.value.trim() || 'A new way to read.';
     els.expiry.textContent = formatDate(job.expires_at) || 'Your EPUB is ready to download.';
@@ -303,7 +330,7 @@
       values.forEach(([number, label]) => { const item = document.createElement('span'); const strong = document.createElement('strong'); strong.textContent = number; item.append(strong, ` ${label}`); els.report.append(item); });
       if (values.length) els.report.classList.remove('hidden'); else els.report.classList.add('hidden');
       const warnings = Array.isArray(report.warnings) ? report.warnings.filter((item) => typeof item === 'string') : [];
-      if (warnings.length) { els.warning.textContent = warnings.join(' '); els.warning.classList.remove('hidden'); } else els.warning.classList.add('hidden');
+      presentWarnings(els.warning, warnings);
     } else { els.report.classList.add('hidden'); els.warning.classList.add('hidden'); }
   }
   async function download() {
@@ -337,7 +364,7 @@
       const title = $('reader-title'); const body = $('reader-body'); title.textContent = data.title || els.readyTitle.textContent;
       body.replaceChildren();
       if (Array.isArray(data.paragraphs)) data.paragraphs.forEach((value) => { if (typeof value !== 'string') return; const paragraph = document.createElement('p'); paragraph.textContent = value; body.append(paragraph); });
-      if (Array.isArray(data.warnings) && data.warnings.some((item) => typeof item === 'string')) { const note = document.createElement('p'); note.className = 'warning-note'; note.textContent = data.warnings.filter((item) => typeof item === 'string').join(' '); body.prepend(note); }
+      if (Array.isArray(data.warnings) && data.warnings.some((item) => typeof item === 'string')) { const note = document.createElement('div'); note.className = 'warning-note'; presentWarnings(note, data.warnings); body.prepend(note); }
       $('reader-panel').classList.remove('night'); body.style.fontSize = `${state.fontSize}px`; show(els.reader);
     } catch (error) { els.warning.textContent = error.message || 'Preview could not be loaded.'; els.warning.classList.remove('hidden'); }
     finally { button.disabled = false; button.innerHTML = 'Preview your book'; }

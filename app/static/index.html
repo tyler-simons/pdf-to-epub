@@ -29,13 +29,18 @@
           <span id="upload-help" class="microcopy">PDF files only · Private storage · Deleted after 24 hours</span>
         </div>
 
+        <div class="upload-options">
         <div class="form-row">
           <label class="field-label" for="title-input">Book title <span class="optional">Optional</span></label>
           <input id="title-input" class="text-input" type="text" maxlength="160" placeholder="A title for your ebook" autocomplete="off">
         </div>
-        <div class="selected-file hidden" id="selected-file" aria-live="polite"></div>
+        <div class="verification-field">
+        <span class="field-label">Browser verification</span>
         <div id="challenge-container" class="challenge-container hidden" aria-label="Browser verification"></div>
         <div class="challenge-feedback"><p id="challenge-status" class="challenge-status" role="status" aria-live="polite"></p><button id="challenge-retry" class="quiet-button hidden" type="button">Try verification again</button></div>
+        </div>
+        </div>
+        <div class="selected-file hidden" id="selected-file" aria-live="polite"></div>
         <button id="convert-button" class="button button-primary" disabled>Convert PDF to EPUB</button>
         <p id="config-note" class="under-button">Private storage · Files deleted after 24 hours.</p>
         <p id="ai-note" class="privacy-note hidden">AI cleanup is on. Selected text may be sent to OpenAI.</p>
