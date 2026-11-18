@@ -21,8 +21,8 @@ The hosted demo is limited, shared, and offered without an uptime guarantee. It 
 Use Python 3.12+. Install Tesseract with English language data for scanned PDFs (`brew install tesseract` on macOS, or `apt install tesseract-ocr tesseract-ocr-eng` on Debian).
 
 ```sh
-git clone https://github.com/tyler-simons/pdf-to-epub.git
-cd pdf-to-epub
+git clone https://github.com/tyler-simons/rebind.git
+cd rebind
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt

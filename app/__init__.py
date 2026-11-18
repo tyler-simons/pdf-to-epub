@@ -1,1 +1,1 @@
-"""Leaf: private PDF-to-EPUB conversion."""
+"""Rebind: private PDF-to-EPUB conversion."""

@@ -159,7 +159,7 @@ def create_app(settings=None):
             for task in tasks:task.cancel()
             for task in tasks:
                 with suppress(asyncio.CancelledError):await task
-    app=FastAPI(title='Leaf',lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None)
+    app=FastAPI(title='Rebind',lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None)
     app.state.store=store
     app.add_middleware(UploadLimit,limit=cfg.max_upload_mb*1024*1024+128*1024)
     @app.middleware('http')
