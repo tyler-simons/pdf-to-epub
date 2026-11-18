@@ -51,7 +51,7 @@ Set `OPENAI_API_KEY` on the converter and enable `LEAF_AI_ENABLED` on the gatewa
 
 This is **light OCR cleanup, not full-book proofreading**. Inline-formatted passages and many spelling issues are outside its detector. Provider errors leave the original EPUB available with a conversion note.
 
-The Vercel gateway defaults to a $9 lifetime allowance and $0.10 per job. Local defaults are documented in `.env.example`; explicitly set your intended budget. The app reserves conservatively before calling AI and retains an allowance for ambiguous outcomes. These are application limits, not provider prepaid wallets or caps on storage, hosting, bandwidth, or unrelated API-key use. Do not delete the ledger to restart the service.
+Configure your own lifetime and per-job AI allowances; `.env.example` starts with AI disabled and placeholder allowances. The app reserves conservatively before calling AI and retains an allowance for ambiguous outcomes. These are application limits, not provider prepaid wallets or caps on storage, hosting, bandwidth, or unrelated API-key use. Do not delete the ledger to restart the service.
 
 ## Quality and privacy
 

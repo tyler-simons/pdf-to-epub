@@ -42,8 +42,8 @@ TURNSTILE_SITE_KEY
 TURNSTILE_SECRET_KEY
 CRON_SECRET
 LEAF_AI_ENABLED=false
-LEAF_AI_BUDGET_MICROUSD=9000000
-LEAF_AI_PER_JOB_MICROUSD=100000
+LEAF_AI_BUDGET_MICROUSD=0     # set your own lifetime allowance before enabling AI
+LEAF_AI_PER_JOB_MICROUSD=0    # set your own per-job allowance
 LEAF_DAILY_JOBS=20
 LEAF_PER_CLIENT_DAILY_JOBS=3
 LEAF_DAILY_PROCESSING_SECONDS=3600
@@ -67,7 +67,7 @@ Do not enable deployment protection that blocks queue-to-worker or worker-to-gat
 
 1. Create/connect the two projects and private storage; deploy with AI disabled.
 2. Connect stable worker/gateway origins in the two sets of variables; redeploy.
-3. Set the gateway custom domain to `pdf.tylersimons.com` and add the DNS records Vercel requests. Leave the main Netlify site unchanged.
+3. Set your gateway custom domain and add the DNS records Vercel requests. Preserve unrelated DNS records.
 4. Create the Turnstile widget for the actual hostname. The client sets action `convert`; the server validates hostname/action and prevents token reuse.
 5. Complete a real digital-PDF upload, scan conversion, download, expiry/deletion and cold-start test. Check queue retries and a deliberately interrupted worker.
 6. Verify Redis admission limits across multiple instances and confirm the lifetime cap survives redeploys.
