@@ -12,6 +12,7 @@ await mkdir(publicRoot, { recursive: true });
 await rm(publicStatic, { recursive: true, force: true });
 await cp(appStatic, publicStatic, { recursive: true });
 await cp(path.join(appStatic, 'index.html'), path.join(publicRoot, 'index.html'));
+await cp(path.join(appStatic, 'favicon.ico'), path.join(publicRoot, 'favicon.ico'));
 await build({
   entryPoints: [path.join(here, 'browser-upload.js')],
   outfile: path.join(publicStatic, 'blob-upload.js'),
