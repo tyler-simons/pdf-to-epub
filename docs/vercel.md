@@ -2,7 +2,7 @@
 
 ## Current state
 
-The Vercel gateway builds locally. Node tests exercise direct-upload authorization, private downloads, internal authentication, and shared Redis/Lua budget transitions. The Python worker is covered by fake-backed API tests. **No Vercel projects, Blob store, Redis integration, production bot keys or API credits have been provisioned by this code.** The container has not been built locally because Docker is unavailable.
+The reference deployment is live at https://pdf.tylersimons.com. Gateway, queue, private Blob storage, Redis, Turnstile, and bounded AI cleanup have been exercised with hosted conversions. These services and credentials are not included with a clone. Provision and verify your own deployment before sharing it.
 
 This is not a deployment of the SQLite pilot. Vercel instances are stateless; local queues and SQLite cannot hold a lifetime spending cap across instances.
 

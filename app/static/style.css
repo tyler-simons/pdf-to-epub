@@ -211,6 +211,9 @@ button, input { font: inherit; }
 .how-notes { padding-top: 18px; border-top: 1px solid var(--border); }
 .how-notes p + p { margin-top: 10px; }
 .footer a { color: inherit; text-underline-offset: 3px; }
+.footer-links { display: flex; gap: 18px; }
+.kindle-link { margin: 12px 0 0; color: var(--muted); font-size: 13px; text-align: center; }
+.kindle-link a, .how-content a { color: var(--sky-button); text-underline-offset: 3px; }
 .reader-panel { overflow: hidden; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
 .reader-toolbar { padding: 10px 14px; border-bottom: 1px solid var(--border); }
 .reader-controls { display: flex; gap: 6px; }

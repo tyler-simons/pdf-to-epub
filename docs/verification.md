@@ -1,21 +1,25 @@
-# Pilot verification
+# Verification scope
 
-Local verification on November 15, 2026:
+Rebind's reference deployment is https://pdf.tylersimons.com. This file describes observed checks, not a guarantee for every PDF or for a fresh self-hosted deployment.
 
-- Generated PDF → authenticated upload → background conversion → preview → EPUB download → explicit deletion worked through Chrome.
-- Desktop and 390px-wide mobile layouts rendered without horizontal overflow; no browser JavaScript errors.
-- Preview font-size and night-theme controls exercised.
-- Automated tests cover generated digital/scanned PDFs, tables and page rules, archive/XML output, private tokens, upload caps, expiry/deletion, worker timeout, durable concurrent budgets, and bounded AI response handling.
-- Real local Tesseract OCR exercised when available.
-- No real AI API calls or charges, no hosted deployment, no GitHub publication, and no keys or third-party books in the source package.
-- Docker configuration is supplied but was not built locally because Docker is not installed. Linux-only resource ceilings remain to be checked in the container before public deployment.
+## Automated checks
 
-Screenshots: [upload](upload.png), [reader](reader.png), [mobile](mobile.png).
+The local suite currently has 47 Python tests and 15 Node tests. It covers generated digital/scanned PDFs, equations and tables, archive/XML/reference validation, authenticated private downloads, expiry, admission limits, concurrent durable budget reservations, Redis Lua state transitions, worker claim/idempotency, subprocess timeouts, safe error propagation, and simulated AI outcomes. See README.md for commands.
 
-Design update: read Tyler’s design-system README, AGENTS.md and DESIGN.md before redesigning. Applied self-hosted Manrope/DM Sans, canvas/ink/sky tokens, restrained surfaces and compact type. Darkened muted text, input boundaries and coral focus treatment to meet contrast goals; the ebook preview retains serif reading type. The private interactive guide could not be fetched, so repository instructions were used. Re-ran the browser flow and all 28 automated tests; checked conditional AI disclosure with a simulated config response. Real API usage remains untested.
+The Vercel gateway production build passes. A workflow template is provided in docs/ci; it is not currently an active GitHub Actions workflow.
 
-Public-access update: removed invite codes, added server-validated Turnstile, a local challenge replay guard, secret-keyed connection identities and atomic rolling-hour attempt limits. Unit/API tests use simulated Cloudflare responses; the frontend is checked with a simulated widget. No Cloudflare account or production widget is configured, and no hosted challenge has been verified.
+## Hosted checks
 
-Public pilot verification: 36 automated tests pass. Browser simulation confirms the challenge gates submission, the token is forwarded, the full conversion/preview/deletion flow works and tokens are cleared after use. No live Cloudflare or OpenAI requests were made.
+- Real private Blob upload, Vercel Queue delivery, Python container conversion, Redis state transitions, preview and EPUB download completed.
+- A controlled live AI test corrected three planted OCR errors after provider funding was configured. Paid services are mocked in the automated suite.
+- A 1,078-page textbook converted and the complete roughly 80 MB EPUB downloaded and passed structural validation. The source book is not distributed in this repository.
+- The default laptop view was checked at a 1280 × 650 CSS-pixel viewport, including real Turnstile rendering. Expanded content and errors can intentionally extend the page.
+- The layout and native disclosure controls were inspected at desktop and mobile widths. Full-book typography, reading order, and editorial correctness are not established by a successful build or archive validation.
 
-GitHub CI template is supplied at `docs/ci/github-actions-test.yml`. It is not installed as a workflow because the current GitHub credential lacks workflow-write permission. Local test/build results are the current evidence.
+## External corpus
+
+See [corpus-results.md](corpus-results.md) for the reproducible public-document corpus and its measured results. Network sources can change; cache hashes identify the exact downloaded files. Structural success is distinct from text quality, reflow, reading order, and faithful equation/table layout.
+
+## Limits
+
+OCR can contain errors. Unreliable PDF font encodings, multi-column reading order, footnotes, and complex layouts may need review or a source-specific repair. The optional AI pass checks only a few suspicious plain-text paragraphs. Large scans may exceed the hosted processing window; the app should fail with a useful message rather than return a partial book.

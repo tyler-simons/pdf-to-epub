@@ -1,0 +1,25 @@
+name: Conversion or app bug
+description: Report a reproducible issue in Rebind.
+body:
+  - type: markdown
+    attributes:
+      value: Please remove secrets, private download links, and personal document content. Share a minimal PDF only if you have permission to publish it.
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: Include what you expected and the message you saw.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: PDF characteristics
+      description: Page count, approximate size, scans or digital text, language, equations/tables, and a public source URL if available.
+  - type: textarea
+    attributes:
+      label: Environment
+      description: Hosted demo or self-hosted, browser, and operating system.

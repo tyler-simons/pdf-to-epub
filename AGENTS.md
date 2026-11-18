@@ -2,7 +2,7 @@
 
 This is the PDF-to-EPUB application built with Tyler. Use ordinary Git/GitHub; do not use garden.
 
-Before UI changes, read https://github.com/tyler-simons/tyler-design-system (AGENTS.md and DESIGN.md). The current static interface uses its palette and self-hosted typography.
+For UI changes, follow the existing palette and self-hosted typography in app/static/style.css. Check desktop, laptop-height, mobile and keyboard interaction.
 
 ## Layout
 
@@ -14,7 +14,7 @@ Before UI changes, read https://github.com/tyler-simons/tyler-design-system (AGE
 - `app/vercel_worker.py`, `Dockerfile.vercel`: separate stateless converter project on Vercel.
 - `tests/`: generated fixtures, fake providers, no copyrighted source books.
 
-Vercel migration is in progress. Read `docs/vercel-worker.md` and the Vercel setup documentation before deployment. A passing local test is not proof of a hosted deployment, configured credits, or a live API call. State those separately.
+The reference deployment runs on Vercel. Read `docs/vercel-worker.md` and the Vercel setup documentation before deployment. A passing local test is not proof of a hosted deployment, configured credits, or a live API call. State those separately.
 
 ## Invariants
 
