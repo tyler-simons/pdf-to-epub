@@ -113,7 +113,13 @@ export function createGateway({cfg,store,blob,uploadHandler,send,challenge=verif
           const preview=Array.isArray(value.preview)?value.preview.filter(x=>typeof x==='string').slice(0,24).map(x=>x.slice(0,2000)):[];
           await store.finish({id:value.job_id,claimToken:value.claim_token,status:value.status,report:safeReport(value.report),preview,
             aiCharge:value.ai_charge_microusd,aiKnown:Number.isSafeInteger(value.ai_charge_microusd),seconds:Math.min(cfg.jobSeconds,value.processing_seconds),outputPath:value.output_path||null,
-            error:value.status==='failed'?'This PDF could not be converted within the pilot limits.':null,now:clock()});
+            error:value.status==='failed'?({
+              page_limit:`This PDF exceeds the ${cfg.maxPages.toLocaleString('en-US')}-page limit. Split it into smaller sections and try again.`,
+              password_required:'This PDF needs a password. Upload an unlocked copy to convert it.',
+              empty_pdf:'This PDF has no readable pages. Choose another file.',
+              invalid_pdf:'This file could not be read as a PDF. Try exporting a fresh PDF copy.',
+              processing_time_limit:'This PDF took too long to convert. Split it into smaller sections and try again.',
+            }[value.error]||'We couldn’t finish this PDF. Try a smaller section or export a fresh PDF copy.'):null,now:clock()});
           return json({ok:true});
         }
       }

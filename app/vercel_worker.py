@@ -23,7 +23,7 @@ from fastapi.responses import JSONResponse
 
 MAX_INPUT_BYTES = 40 * 1024 * 1024
 MAX_WORKER_SECONDS = 240
-MAX_PAGES = 1000
+MAX_PAGES = 1500
 MAX_PREVIEW_PARAGRAPHS = 24
 MAX_PREVIEW_CHARS = 2000
 _JOB_ID = re.compile(r"^(?:[0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$", re.I)
@@ -186,6 +186,10 @@ class _AllowanceBudget:
         return self.actual if self.actual is not None else self.reserved
 
 
+class ConversionFailure(ValueError):
+    pass
+
+
 def _run_converter(source: Path, output: Path, report: Path, job: dict, timeout: float) -> None:
     args = [sys.executable, "-m", "app.runner", str(source), str(output),
             "--report", str(report), "--max-pages", str(job["max_pages"]), "--title", job["title"][:240]]
@@ -204,6 +208,13 @@ def _run_converter(source: Path, output: Path, report: Path, job: dict, timeout:
         process.wait()
         raise TimeoutError("conversion timed out") from exc
     if return_code != 0 or not output.is_file() or not report.is_file():
+        if report.is_file():
+            try:
+                code = json.loads(report.read_text(encoding='utf-8')).get('error_code')
+                if code in {'page_limit', 'password_required', 'empty_pdf'}:
+                    raise ConversionFailure(code)
+            except (OSError, json.JSONDecodeError):
+                pass
         raise ValueError("conversion failed")
 
 
@@ -269,6 +280,8 @@ async def _process(job_id: str, job: dict, claim_token: str, gateway: str, secre
                        preview=preview, ai_charge_microusd=ai_charge, error=None)
     except TimeoutError:
         outcome["error"] = "processing_time_limit"
+    except ConversionFailure as exc:
+        outcome["error"] = str(exc)
     except ValueError as exc:
         outcome["error"] = "invalid_pdf" if str(exc) in {"input is not a PDF", "empty input", "input size rejected"} else "conversion_failed"
     except Exception:

@@ -172,7 +172,7 @@ export class Store {
     perClientJobs = 3, dailySeconds = 3600, maxPending = 10,
     jobSeconds = 240, retentionSeconds = 86400, attemptsPerHour = 12,
     aiEnabled = false, aiPerJob = 100_000, maxUploadBytes = 40 * 1024 * 1024,
-    uploadTimeoutSeconds = 300, maxPages = 1000,
+    uploadTimeoutSeconds = 300, maxPages = 1500,
   } = {}) {
     if (!redis?.eval) throw new TypeError('redis must implement eval(script, keys, args)');
     this.redis = redis;

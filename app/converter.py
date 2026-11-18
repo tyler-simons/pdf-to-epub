@@ -194,6 +194,12 @@ def main(argv=None):
         print(json.dumps(convert(args.source, args.output, args.report, args.max_pages, args.title), ensure_ascii=False))
         return 0
     except Exception as exc:
+        message = str(exc)
+        code = ('page_limit' if 'exceeding max_pages=' in message else
+                'password_required' if 'requiring a password' in message else
+                'empty_pdf' if 'PDF has no pages' in message else 'conversion_failed')
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(json.dumps({'error_code': code}), encoding='utf-8')
         print(f"conversion failed: {type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
 

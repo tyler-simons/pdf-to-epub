@@ -111,7 +111,7 @@ test('upload token is single-use, path/size checked, and claim is atomic', { ski
     const claimed = claims.find(c => c.claimed);
     assert.equal(claimed.job.ai_enabled, true);
     assert.equal(claimed.job.ai_allowance_microusd, 100_000);
-    assert.equal(claimed.job.max_pages, 1000);
+    assert.equal(claimed.job.max_pages, 1500);
     assert.equal('token_hash' in claimed.job, false);
     assert.equal('owner_hash' in claimed.job, false);
     assert.equal(await redis.get(store.key('pending')), '1');

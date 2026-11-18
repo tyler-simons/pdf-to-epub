@@ -15,7 +15,7 @@ class Settings:
     api_key: str = field(default_factory=lambda: os.getenv('OPENAI_API_KEY',''),repr=False)
     max_ai_per_job_microusd: int = field(default_factory=lambda: int(os.getenv('LEAF_AI_PER_JOB_MICROUSD','100000')))
     max_upload_mb: int = 40
-    max_pages: int = 1000
+    max_pages: int = 1500
     retention_hours: int = 24
     job_timeout_seconds: int = field(default_factory=lambda: int(os.getenv('LEAF_JOB_TIMEOUT_SECONDS','300')))
     daily_jobs: int = field(default_factory=lambda: int(os.getenv('LEAF_DAILY_JOBS','20')))

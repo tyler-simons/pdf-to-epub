@@ -194,3 +194,14 @@ def test_converter_timeout_kills_entire_process_group(monkeypatch, tmp_path):
     with pytest.raises(TimeoutError, match="timed out"):
         worker._run_converter(tmp_path / "source.pdf", tmp_path / "out.epub", tmp_path / "report.json", _job(), 0.01)
     assert calls == [(4321, signal.SIGKILL), "reaped"]
+
+@pytest.mark.parametrize('code', ['page_limit', 'password_required', 'empty_pdf'])
+def test_converter_preserves_actionable_failure(monkeypatch, tmp_path, code):
+    report = tmp_path / 'report.json'
+    report.write_text(json.dumps({'error_code': code}))
+    class FailedProcess:
+        def wait(self, timeout=None):
+            return 1
+    monkeypatch.setattr(worker.subprocess, 'Popen', lambda *args, **kwargs: FailedProcess())
+    with pytest.raises(worker.ConversionFailure, match=code):
+        worker._run_converter(tmp_path / 'input.pdf', tmp_path / 'book.epub', report, _job(), 10)
