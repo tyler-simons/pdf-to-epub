@@ -1,6 +1,6 @@
 # Public PDF compatibility corpus
 
-Measured locally on 2026-11-17 with PyMuPDF and installed Tesseract; no AI or hosted conversion calls. Thirteen public PDFs, 84 pages total: all thirteen produced internally validated EPUBs with one XHTML page per source page. This is a **structural pass**, not a fidelity certification. All sources have SHA256 pins in [the manifest](../tests/corpus/manifest.json). Downloaded PDFs and generated EPUBs remain in ignored `.corpus-cache/`; none are bundled.
+The table below was measured locally on 2026-11-17 with PyMuPDF and installed Tesseract, without AI. Three representative sources were also checked through the hosted service, as described below. Thirteen public PDFs, 84 pages total: all thirteen produced internally validated EPUBs with one XHTML page per source page. This is a **structural pass**, not a fidelity certification. All sources have SHA256 pins in [the manifest](../tests/corpus/manifest.json). Downloaded PDFs and generated EPUBs remain in ignored `.corpus-cache/`; none are bundled.
 
 ## Measurements
 
@@ -44,3 +44,7 @@ This is a small compatibility corpus, not a universal quality score. It lacks in
 A separate user-provided 1,078-page textbook previously completed hosted conversion. It is outside this public corpus; its PDF, generated book and private filename are not distributed.
 
 Final rerun uses `app.runner` with an allowlist of PATH, PYTHONPATH, LANG, LC_ALL, OMP_THREAD_LIMIT and LEAF_CHILD_SECONDS; credentials are not inherited. Linux adds memory/CPU/file ceilings. Conversion timeouts terminate the whole process group, including OCR. All thirteen sources and four generated probes were rerun through this path.
+
+## Hosted spot-checks
+
+After deploying the column-order fix, the Word and OpenOffice W3C column samples and the 15-page arXiv paper also completed through the real private Blob → Queue → converter → gateway flow. Both column samples passed the expected sequence check in the hosted preview. Each reported 3 seconds of processing and zero AI charge. These three spot-checks establish the hosted path for those files; the full 13-file table remains a local converter test, not 13 end-to-end browser tests.

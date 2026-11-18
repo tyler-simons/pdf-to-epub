@@ -12,6 +12,7 @@ The Vercel gateway production build passes. A workflow template is provided in d
 
 - Real private Blob upload, Vercel Queue delivery, Python container conversion, Redis state transitions, preview and EPUB download completed.
 - A controlled live AI test corrected three planted OCR errors after provider funding was configured. Paid services are mocked in the automated suite.
+- Three public-corpus sources completed hosted conversion after the reading-order fix; both column examples passed the expected preview order, with AI disabled.
 - A 1,078-page textbook converted and the complete roughly 80 MB EPUB downloaded and passed structural validation. The source book is not distributed in this repository.
 - The default laptop view was checked at a 1280 × 650 CSS-pixel viewport, including real Turnstile rendering. Expanded content and errors can intentionally extend the page.
 - The layout and native disclosure controls were inspected at desktop and mobile widths. Full-book typography, reading order, and editorial correctness are not established by a successful build or archive validation.
