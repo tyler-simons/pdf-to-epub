@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#F3F9FA">
-  <title>PDF to EPUB</title>
+  <title>Rebind — Make your PDFs easier to read</title>
+  <meta name="description" content="Turn a PDF into an EPUB for Apple Books or Kindle. More comfortable type, dark mode, and a book that fits your screen.">
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="/static/favicon.ico">
   <link rel="stylesheet" href="/static/style.css">
@@ -12,13 +13,16 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/" aria-label="PDF to EPUB home">PDF <span aria-hidden="true">→</span> EPUB</a>
+    <a class="brand" href="/" aria-label="Rebind home"><img src="/static/favicon.svg" width="28" height="28" alt="">Rebind</a>
+    <a class="topbar-link" href="https://tylersimons.com">By Tyler Simons <span aria-hidden="true">↗</span></a>
   </header>
 
   <main class="shell">
     <section class="intro" aria-labelledby="page-title">
-      <h1 id="page-title">PDF to EPUB</h1>
-      <p class="lede">Make your PDFs easier to read.</p>
+      <p class="intro-kicker">PDF <span aria-hidden="true">→</span> EPUB</p>
+      <h1 id="page-title">Rebind<span class="title-period" aria-hidden="true">.</span></h1>
+      <p class="lede">Your PDFs, made for reading.</p>
+      <p class="intro-detail">Adjustable type. Dark mode. A book that fits your screen.</p>
     </section>
 
     <section class="workspace" aria-label="PDF conversion">
@@ -28,7 +32,7 @@
           <span class="upload-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 32V8m0 0-9 9m9-9 9 9M9 29v10h30V29"/></svg></span>
           <span class="drop-title">Drop a PDF to get started</span>
           <span class="drop-subtitle">or <span class="text-link">choose a file</span></span>
-          <span id="upload-help" class="microcopy">PDF files only · Private storage · Deleted after 24 hours</span>
+          <span id="upload-help" class="microcopy">Start with a PDF. Leave with a book.</span>
         </div>
 
         <div class="upload-options">
@@ -73,8 +77,19 @@
     </section>
 
     <p class="footnote"><span aria-hidden="true">✳</span> Best with text-based PDFs. Complex layouts and images may not carry over exactly.</p>
+    <details class="how-it-works">
+      <summary><span>How Rebind works</span><span class="expander-icon" aria-hidden="true">+</span></summary>
+      <div class="how-content">
+        <ol class="how-steps">
+          <li><div><h2>Bring your PDF</h2><p>Upload a book, paper, or document. Rebind extracts its text and uses character recognition for scanned pages.</p></div></li>
+          <li><div><h2>Give it room to flow</h2><p>We package the text into an EPUB, so your reader can adjust its type and layout. Complex equations and tables may stay as page images to preserve their meaning.</p></div></li>
+          <li><div><h2>Make yourself comfortable</h2><p>Download your EPUB and open it in Apple Books, or use Send to Kindle. Choose your font size and reading theme in your reader.</p></div></li>
+        </ol>
+        <div class="how-notes"><h2>A little care, a few limits</h2><p>When AI cleanup is on, a small selection of text with suspected recognition errors is sent to OpenAI for correction. This is a light cleanup, not a full proofread. Image-based pages won’t have the same adjustable text as the rest of the book.</p><p>Files are stored privately and expire after 24 hours. Keep your downloaded copy. Large or heavily scanned books may need to be split into smaller sections.</p></div>
+      </div>
+    </details>
   </main>
 
-  <footer class="footer"><span>Made by Tyler Simons</span><span>Files are private and automatically deleted after 24 hours.</span></footer>
+  <footer class="footer"><span>Made by <a href="https://tylersimons.com">Tyler Simons</a></span><a href="https://tylersimons.com/projects">More projects <span aria-hidden="true">↗</span></a></footer>
 </body>
 </html>
