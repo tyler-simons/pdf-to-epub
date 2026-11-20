@@ -48,3 +48,19 @@ Final rerun uses `app.runner` with an allowlist of PATH, PYTHONPATH, LANG, LC_AL
 ## Hosted spot-checks
 
 After deploying the column-order fix, the Word and OpenOffice W3C column samples and the 15-page arXiv paper also completed through the real private Blob → Queue → converter → gateway flow. Both column samples passed the expected sequence check in the hosted preview. Each reported 3 seconds of processing and zero AI charge. These three spot-checks establish the hosted path for those files; the full 13-file table remains a local converter test, not 13 end-to-end browser tests.
+
+### Region preservation update
+
+The converter now groups connected bitmap table rules and preserves text using
+known encoded mathematics fonts as bounded image regions. Repeated short running
+headers and margin page numbers are removed; bookmark labels no longer insert
+extra headings into page bodies. Unicode presentation ligatures are normalized,
+and obvious lowercase line-wrap hyphenations are joined.
+
+All 13 public corpus files still pass structural and page-coverage checks.
+Generated regression fixtures additionally check bitmap-table grouping and running
+header removal. Structural passes do not establish visual or editorial quality.
+Math-containing paragraphs may remain images: they preserve source glyphs but
+cannot fully reflow, search, or adapt to a reader's theme. Region count and removed
+margin count are recorded in conversion reports. No external AI is needed for
+these repairs.

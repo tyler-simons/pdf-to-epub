@@ -14,26 +14,25 @@
 <body>
   <header class="topbar">
     <a class="brand" href="/" aria-label="Rebind home"><img src="/static/favicon.svg" width="28" height="28" alt="">Rebind</a>
-    <a class="topbar-link" href="https://tylersimons.com">By Tyler Simons <span aria-hidden="true">↗</span></a>
+    <nav class="topbar-nav" aria-label="Main"><a class="topbar-link" href="#how-it-works">How it works</a><a class="topbar-link" href="https://github.com/tyler-simons/rebind">GitHub <span aria-hidden="true">↗</span></a></nav>
   </header>
 
   <main class="shell">
     <section class="intro" aria-labelledby="page-title">
-      <p class="intro-kicker">PDF <span aria-hidden="true">→</span> EPUB</p>
-      <h1 id="page-title">Rebind<span class="title-period" aria-hidden="true">.</span></h1>
-      <p class="lede">Your PDFs, made for reading.</p>
-      <p class="intro-detail">Adjustable type. Dark mode. A book that fits your screen.</p>
+      <h1 id="page-title">Make your PDFs easier to read.</h1>
+      <p class="lede">Create an EPUB for Apple Books or Send to Kindle.</p>
     </section>
 
     <section class="workspace" aria-label="PDF conversion">
       <div id="upload-panel" class="upload-panel">
+        <input id="file-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" aria-label="Choose a PDF file" tabindex="-1">
         <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-describedby="upload-help">
-          <input id="file-input" class="visually-hidden" type="file" accept="application/pdf,.pdf" aria-label="Choose a PDF file">
-          <span class="upload-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M24 32V8m0 0-9 9m9-9 9 9M9 29v10h30V29"/></svg></span>
-          <span class="drop-title">Drop a PDF to get started</span>
-          <span class="drop-subtitle">or <span class="text-link">choose a file</span></span>
-          <span id="upload-help" class="microcopy">Start with a PDF. Leave with a book.</span>
+          <span class="upload-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M29 6H13v36h24V14L29 6Zm0 0v9h8M25 34V21m0 0-5 5m5-5 5 5"/></svg></span>
+          <span class="drop-title">Drop a PDF here</span>
+          <span id="upload-help" class="microcopy">Choose a file from your device.</span>
         </div>
+        <button id="choose-file" class="button button-primary choose-file" type="button">Choose PDF</button>
+        <div class="file-summary"><div class="selected-file hidden" id="selected-file" aria-live="polite"></div><button id="remove-file" class="quiet-button" type="button">Remove</button></div>
 
         <div class="upload-options">
         <div class="form-row">
@@ -46,7 +45,6 @@
         <div class="challenge-feedback"><p id="challenge-status" class="challenge-status" role="status" aria-live="polite"></p><button id="challenge-retry" class="quiet-button hidden" type="button">Try verification again</button></div>
         </div>
         </div>
-        <div class="selected-file hidden" id="selected-file" aria-live="polite"></div>
         <button id="convert-button" class="button button-primary" disabled>Convert PDF to EPUB</button>
         <p id="config-note" class="under-button">Private storage · Files deleted after 24 hours.</p>
         <p id="ai-note" class="privacy-note hidden">AI cleanup is on. Selected text may be sent to OpenAI.</p>
@@ -78,7 +76,7 @@
     </section>
 
     <p class="footnote"><span aria-hidden="true">✳</span> Best with text-based PDFs. Complex layouts and images may not carry over exactly.</p>
-    <details class="how-it-works">
+    <details class="how-it-works" id="how-it-works">
       <summary><span>How Rebind works</span><span class="expander-icon" aria-hidden="true">+</span></summary>
       <div class="how-content">
         <ol class="how-steps">

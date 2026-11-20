@@ -162,3 +162,45 @@ def test_columns_allow_small_font_bbox_overlap():
              ((306,69,520,90),'right first',True),
              ((327,228,520,255),'right last',True)]
     assert [item[1] for item in _reading_order(items,595)] == ['left first','left last','right first','right last']
+
+
+def test_repeated_margins_removed_without_duplicate_bookmark_heading(tmp_path):
+    doc = fitz.open()
+    for i in range(6):
+        page = doc.new_page()
+        page.insert_text((50, 30), f"Running book header {i + 1}")
+        page.insert_text((50, 120), "Actual section heading", fontname="hebo")
+        page.insert_text((50, 160), "Readable ordinary paragraph.")
+    doc.set_toc([[1, "Actual section heading", 1]])
+    source = tmp_path / "margins.pdf"
+    doc.save(source); doc.close()
+    result = convert(source, tmp_path / "book.epub", tmp_path / "report.json")
+    assert result["running_margins_removed"] == 6
+    with zipfile.ZipFile(tmp_path / "book.epub") as archive:
+        text = archive.read("EPUB/text/p1.xhtml").decode()
+        assert "Running book header" not in text
+        assert text.count("Actual section heading") == 1
+
+
+def test_bitmap_table_rules_become_one_readable_region(tmp_path):
+    from PIL import Image
+    rule = tmp_path / "rule.png"
+    Image.new("RGB", (1, 1), "black").save(rule)
+    doc = fitz.open(); page = doc.new_page()
+    page.insert_text((72, 100), "Prose before the table.")
+    for y in (140, 165, 190):
+        page.insert_image(fitz.Rect(72, y, 300, y + .6), filename=str(rule), keep_proportion=False)
+    for x in (72, 180, 300):
+        page.insert_image(fitz.Rect(x, 140, x + .6, 190), filename=str(rule), keep_proportion=False)
+    page.insert_text((80, 157), "Alpha")
+    page.insert_text((80, 182), "Beta")
+    page.insert_text((72, 230), "Prose after the table.")
+    source = tmp_path / "table-rules.pdf"
+    doc.save(source); doc.close()
+    result = convert(source, tmp_path / "book.epub", tmp_path / "report.json")
+    assert result["complex_regions_preserved"] == 1
+    assert result["image_count"] == 1
+    with zipfile.ZipFile(tmp_path / "book.epub") as archive:
+        text = archive.read("EPUB/text/p1.xhtml").decode()
+        assert "Prose before" in text and "Prose after" in text
+        assert "Alpha" not in text  # Preserved inside the table crop.

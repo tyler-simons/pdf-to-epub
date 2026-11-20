@@ -7,7 +7,7 @@
     progressTitle: $('progress-title'), detail: $('progress-detail'), fill: $('progress-fill'), status: $('status-line'), error: $('error-box'), readyTitle: $('ready-title'), expiry: $('expiry-line'), report: $('report'), warning: $('warning-note'),
   };
   const STORAGE_KEY = 'leaf-active-job';
-  const state = { file: null, config: null, configReady: false, challengeToken: null, challengeWidget: null, challengeScript: null, directScript: null, job: null, pollTimer: null, request: null, generation: 0, fontSize: 18 };
+  const state = { file: null, config: null, configReady: false, challengeToken: null, challengeWidget: null, challengeScript: null, challengeGeneration: 0, directScript: null, job: null, pollTimer: null, request: null, generation: 0, fontSize: 18 };
 
   function show(panel) {
     [els.upload, els.progress, els.ready, els.reader].forEach((item) => item.classList.add('hidden'));
@@ -24,7 +24,12 @@
     if (!(file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) { showError('Please choose a PDF file.'); return; }
     if (state.config?.max_upload_mb && file.size > state.config.max_upload_mb * 1024 * 1024) { showError(`This file is larger than the ${state.config.max_upload_mb} MB limit.`); return; }
     state.file = file;
-    els.selected.textContent = `${file.name} · ${bytes(file.size)}`;
+    els.selected.replaceChildren();
+    const name = document.createElement('strong'); name.textContent = file.name;
+    const size = document.createElement('span'); size.textContent = `${bytes(file.size)} · PDF document`;
+    els.selected.append(name, size);
+    els.upload.classList.add('has-file');
+    if (state.configReady && state.config?.turnstile_site_key && state.challengeWidget === null) void setupChallenge(state.config.turnstile_site_key);
     els.selected.classList.remove('hidden');
     els.error.classList.add('hidden');
     setBusy(false);
@@ -59,14 +64,19 @@
       if (!response.ok) throw new Error('Configuration could not be loaded.');
       state.config = await response.json();
       state.configReady = true;
+      $('upload-help').textContent = state.config.max_upload_mb ? `Up to ${state.config.max_upload_mb} MB` : 'Choose a file from your device.';
       els.aiNote.classList.toggle('hidden', state.config.ai_enabled !== true);
       if (state.config.max_upload_mb) els.configNote.textContent = `Up to ${state.config.max_upload_mb} MB · Private storage · Files deleted after 24 hours.`;
       else els.configNote.textContent = 'Private storage · Files deleted after 24 hours.';
-      if (state.config.turnstile_site_key) await setupChallenge(state.config.turnstile_site_key);
-      else setBusy(false);
+      if (state.file && state.config.turnstile_site_key) await setupChallenge(state.config.turnstile_site_key);
+      else {
+        if (!state.config.turnstile_site_key) els.challengeStatus.textContent = 'No verification needed.';
+        setBusy(false);
+      }
     } catch (_) {
       state.configReady = false;
       els.challengeStatus.textContent = 'Could not load the upload settings. Reload the page to try again.';
+      els.configNote.textContent = 'Upload settings unavailable. Reload the page to try again.';
       setBusy(false);
     }
   }
@@ -84,27 +94,32 @@
     return state.challengeScript;
   }
   async function setupChallenge(sitekey) {
+    const challengeGeneration = ++state.challengeGeneration;
     els.challenge.classList.remove('hidden');
     els.challengeStatus.textContent = 'Loading browser verification…';
     try {
       await loadTurnstileScript();
+      if (challengeGeneration !== state.challengeGeneration || !state.file) return;
       if (state.challengeWidget !== null) window.turnstile.remove(state.challengeWidget);
       state.challengeToken = null;
       state.challengeWidget = window.turnstile.render(els.challenge, {
         sitekey,
         action: 'convert',
         callback(token) {
+          if (challengeGeneration !== state.challengeGeneration || !state.file) return;
           state.challengeToken = token;
           els.challengeStatus.textContent = '';
           els.challengeRetry.classList.add('hidden');
           setBusy(false);
         },
         'expired-callback'() {
+          if (challengeGeneration !== state.challengeGeneration || !state.file) return;
           state.challengeToken = null;
           els.challengeStatus.textContent = 'Verification expired. Complete it again to continue.';
           setBusy(false);
         },
         'error-callback'() {
+          if (challengeGeneration !== state.challengeGeneration || !state.file) return;
           state.challengeToken = null;
           els.challengeStatus.textContent = 'Couldn’t verify this browser. Try again.';
           els.challengeRetry.classList.remove('hidden');
@@ -113,6 +128,7 @@
       });
       els.challengeStatus.textContent = 'Complete the browser verification to convert your PDF.';
     } catch (_) {
+      if (challengeGeneration !== state.challengeGeneration || !state.file) return;
       state.challengeToken = null;
       state.challengeScript = null;
       els.challengeStatus.textContent = 'Could not load browser verification. Check your connection and try again.';
@@ -374,10 +390,16 @@
     state.generation++; if (state.request) state.request.abort(); state.request = null; stopPolling(); state.job = null; state.file = null;
     if (pendingJob) void deletePendingJob(pendingJob);
     sessionStorage.removeItem(STORAGE_KEY); els.file.value = ''; els.title.value = ''; els.selected.classList.add('hidden'); els.error.classList.add('hidden'); els.warning.classList.add('hidden');
-    resetChallenge();
+    state.challengeGeneration++;
+    if (state.challengeWidget !== null && window.turnstile) { try { window.turnstile.remove(state.challengeWidget); } catch (_) {} }
+    state.challengeWidget = null; state.challengeToken = null;
+    els.challenge.classList.add('hidden'); els.challengeStatus.textContent = state.configReady && !state.config?.turnstile_site_key ? 'No verification needed.' : ''; els.challengeRetry.classList.add('hidden');
+    els.upload.classList.remove('has-file');
     els.convert.disabled = true; els.convert.textContent = 'Convert PDF to EPUB'; show(els.upload);
   }
 
+  $('choose-file').addEventListener('click', () => els.file.click());
+  $('remove-file').addEventListener('click', () => { reset(); $('choose-file').focus(); });
   els.drop.addEventListener('click', (event) => { if (event.target !== els.file) els.file.click(); });
   els.drop.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); els.file.click(); } });
   els.file.addEventListener('change', () => selectFile(els.file.files[0]));

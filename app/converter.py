@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import html
 import json
 import re
@@ -21,6 +22,7 @@ CONTAINER = '<?xml version="1.0" encoding="UTF-8"?><container version="1.0" xmln
 
 
 def esc(value: str) -> str:
+    value = value.translate(str.maketrans({"ﬁ":"fi", "ﬂ":"fl", "ﬀ":"ff", "ﬃ":"ffi", "ﬄ":"ffl", "ﬅ":"st", "ﬆ":"st"}))
     value = "".join(ch if ch in "\t\n\r" or ord(ch) >= 32 and not 0xD800 <= ord(ch) <= 0xDFFF else " " for ch in value)
     return html.escape(value, quote=False)
 
@@ -56,6 +58,60 @@ def _reading_order(items, page_width):
     return result
 
 
+def _margin_key(block, height):
+    text = " ".join(span.get("text", "") for line in block.get("lines", []) for span in line.get("spans", []))
+    if len(text) > 160 or not (block["bbox"][3] < height * .08 or block["bbox"][1] > height * .9):
+        return None
+    return re.sub(r"\d+", "#", text.strip()).lower()
+
+
+def _complex_regions(blocks):
+    """Preserve encoded equations and connected bitmap table rules as crops."""
+    regions = []
+    for block in blocks:
+        if block.get("type") == 1:
+            rect = fitz.Rect(block["bbox"])
+            if min(rect.width, rect.height) < 2:
+                regions.append(rect)
+        elif block.get("type") == 0:
+            for line in block.get("lines", []):
+                if any(re.search(r"MT2|MSBM|CMSY|CMEX", span.get("font", ""), re.I) for span in line.get("spans", [])):
+                    regions.append(fitz.Rect(line["bbox"]))
+    # Grow connected rules into one table; merge touching equation fragments.
+    merged = []
+    for rect in regions:
+        changed = True
+        while changed:
+            changed = False
+            for other in list(merged):
+                if (rect + (-3, -3, 3, 3)).intersects(other):
+                    rect |= other
+                    merged.remove(other)
+                    changed = True
+        merged.append(rect)
+    # A PDF block may interleave prose and formula fragments. Include that whole
+    # block rather than omit characters or duplicate them outside the crop.
+    changed = True
+    while changed:
+        changed = False
+        for i, rect in enumerate(merged):
+            for block in blocks:
+                box = fitz.Rect(block["bbox"])
+                if rect.intersects(box) and not rect.contains(box):
+                    rect |= box
+                    changed = True
+            merged[i] = rect
+        for i in range(len(merged)):
+            for j in range(i + 1, len(merged)):
+                if merged[i].intersects(merged[j]):
+                    merged[i] |= merged.pop(j)
+                    changed = True
+                    break
+            if changed:
+                break
+    return merged
+
+
 def convert(source: Path, output: Path, report: Path, max_pages: int = 1000, title: str | None = None) -> dict:
     source, output, report = Path(source), Path(output), Path(report)
     if max_pages < 1:
@@ -64,6 +120,7 @@ def convert(source: Path, output: Path, report: Path, max_pages: int = 1000, tit
         raise ValueError("Source and output must differ")
     warnings, bodies, images = [], [], []
     ocr_pages = 0
+    margins_removed = region_count = 0
     with fitz.open(source) as doc:
         if doc.is_encrypted and not doc.authenticate(""):
             raise ValueError("Encrypted PDFs requiring a password are unsupported")
@@ -75,6 +132,9 @@ def convert(source: Path, output: Path, report: Path, max_pages: int = 1000, tit
         output.parent.mkdir(parents=True, exist_ok=True)
         book_title = " ".join(esc(title or doc.metadata.get("title") or source.stem).split())[:240]
         outline = [(level, label.strip(), page) for level, label, page, *_ in doc.get_toc() if label.strip() and 1 <= page <= count]
+        margin_counts = Counter()
+        for page in doc:
+            margin_counts.update(set(key for b in page.get_text("dict").get("blocks", []) if b.get("type") == 0 and (key := _margin_key(b, page.rect.height))))
         with tempfile.TemporaryDirectory(prefix="pdf-epub-", dir=output.parent) as temp:
             root = Path(temp)
             text_dir, image_dir = root / "EPUB/text", root / "EPUB/images"
@@ -82,6 +142,15 @@ def convert(source: Path, output: Path, report: Path, max_pages: int = 1000, tit
             for index in range(count):
                 page = doc[index]
                 blocks = page.get_text("dict").get("blocks", [])
+                filtered = []
+                for block in blocks:
+                    key = _margin_key(block, page.rect.height) if block.get("type") == 0 else None
+                    if key and (re.fullmatch(r"[#ivxlcdm ]+", key) or count >= 6 and margin_counts[key] >= 2):
+                        margins_removed += 1
+                    else:
+                        filtered.append(block)
+                blocks = filtered
+                regions = _complex_regions(blocks)
                 raw = page.get_text("text").strip()
                 lines = [line for line in raw.splitlines() if line.strip()]
                 text_blocks = [b for b in blocks if b.get("type") == 0]
@@ -96,7 +165,7 @@ def convert(source: Path, output: Path, report: Path, max_pages: int = 1000, tit
                 if re.search(r"[A-Za-z]=[a-z]", raw):
                     warnings.append(f"Page {index+1}: extracted text contains possible broken ligatures; source text was preserved without automatic repair.")
                 body = []
-                if table or math:
+                if (table or math) and not regions:
                     scale = max(0.1, min(2, 2000 / max(page.rect.width, page.rect.height)))
                     name = f"page-{index+1}.jpg"
                     page.get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False).save(str(image_dir / name))
@@ -128,8 +197,25 @@ def convert(source: Path, output: Path, report: Path, max_pages: int = 1000, tit
                         images.append(name)
                         body.append(f'<figure><img src="../images/{name}" alt="Scanned page {index+1}"/></figure>')
                 else:
+                    sizes = Counter()
+                    for block in blocks:
+                        for line in block.get("lines", []):
+                            for span in line.get("spans", []):
+                                sizes[round(span.get("size", 12), 1)] += len(span.get("text", ""))
+                    body_size = sizes.most_common(1)[0][0] if sizes else 12
                     ordered = []
+                    for number, rect in enumerate(regions):
+                        clip = (rect + (-1, -1, 1, 1)) & page.rect
+                        if clip.is_empty or clip.width < .5 or clip.height < .5:
+                            continue
+                        name = f"p{index+1}-region{number+1}.png"
+                        page.get_pixmap(matrix=fitz.Matrix(2, 2), clip=clip, alpha=False).save(str(image_dir / name))
+                        images.append(name)
+                        region_count += 1
+                        ordered.append((tuple(rect), f'<figure><img src="../images/{name}" alt="Equation or table on page {index+1}"/></figure>', False))
                     for block in (b for b in blocks if b.get("type") == 0):
+                        if any(rect.intersects(fitz.Rect(block["bbox"])) for rect in regions):
+                            continue
                         para = []
                         for line in block.get("lines", []):
                             spans = []
@@ -139,9 +225,20 @@ def convert(source: Path, output: Path, report: Path, max_pages: int = 1000, tit
                                 if flags & 2: txt = f"<em>{txt}</em>"
                                 spans.append(txt)
                             para.append("".join(spans))
-                        text = " ".join(para).strip()
-                        if text: ordered.append((block["bbox"], f"<p>{text}</p>", True))
+                        text = ""
+                        for fragment in para:
+                            if re.search(r"[a-zA-Z]-((?:</(?:em|strong)>)*?)$", text) and re.match(r"(?:<(?:em|strong)>)*[a-z]", fragment):
+                                text = re.sub(r"-((?:</(?:em|strong)>)*?)$", r"\1", text) + fragment
+                            else:
+                                text += (" " if text else "") + fragment
+                        text = text.strip()
+                        spans = [span for line in block.get("lines", []) for span in line.get("spans", []) if span.get("text", "").strip()]
+                        heading = len(re.sub(r"<[^>]+>", "", text)) < 220 and spans and all(span.get("flags", 0) & 16 for span in spans) and max(span.get("size", 0) for span in spans) >= body_size * 1.1
+                        tag = "h2" if heading else "p"
+                        if text: ordered.append((block["bbox"], f"<{tag}>{text}</{tag}>", True))
                     for block in (b for b in blocks if b.get("type") == 1):
+                        if any(rect.intersects(fitz.Rect(block["bbox"])) for rect in regions):
+                            continue
                         if block.get("type") == 1 and block.get("image"):
                             ext = block.get("ext", "png").lower()
                             if ext not in {"png", "jpg", "jpeg", "webp"}: ext = "png"
@@ -164,6 +261,8 @@ def convert(source: Path, output: Path, report: Path, max_pages: int = 1000, tit
                         bodies[i - 1] = bodies[i - 1][:prev.start(1)] + prev.group(1) + " " + first.group(1) + "</p>" + bodies[i - 1][prev.end(0):]
                         bodies[i] = bodies[i][first.end(0):].lstrip() or "<p></p>"
 
+            if region_count:
+                warnings.append(f"{region_count} equation or table regions preserved as images for accuracy; these regions do not reflow or adapt to reader themes.")
             toc = []
             for _, label, page in outline:
                 toc.append(f'<li><a href="text/p{page}.xhtml">{esc(label)}</a></li>')
@@ -172,7 +271,7 @@ def convert(source: Path, output: Path, report: Path, max_pages: int = 1000, tit
             (root / "EPUB/nav.xhtml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><head><title>Contents</title></head><body><nav epub:type="toc"><h1>Contents</h1><ol>' + ''.join(toc) + '</ol></nav></body></html>', encoding="utf8")
             for i, body in enumerate(bodies):
                 headings = [label for _, label, p in outline if p == i + 1]
-                heading = f'<h1>{esc(headings[0])}</h1>' if headings else ""
+                heading = ""  # Bookmarks navigate; source headings remain in their original position.
                 xhtml = f'<?xml version="1.0" encoding="UTF-8"?>\n<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Page {i+1}</title><link rel="stylesheet" type="text/css" href="../style.css"/></head><body>{heading}{body}</body></html>'
                 (text_dir / f"p{i+1}.xhtml").write_text(xhtml, encoding="utf8")
             (root / "EPUB/style.css").write_text("body{margin:5%;line-height:1.55;font-family:serif}p{margin:0 0 1em;text-indent:1.2em}h1,h2{line-height:1.2}figure{margin:1em 0;text-align:center}img{max-width:100%;height:auto}", encoding="utf8")
@@ -194,7 +293,7 @@ def convert(source: Path, output: Path, report: Path, max_pages: int = 1000, tit
                 for file in sorted(root.rglob("*")):
                     if file.is_file(): archive.write(file, file.relative_to(root).as_posix(), compress_type=zipfile.ZIP_DEFLATED)
             _validate(output)
-        result = {"source": source.name, "output": output.name, "title": book_title, "source_pages": len(doc), "converted_pages": count, "text_pages": sum(bool(doc[i].get_text().strip()) for i in range(count)), "ocr_pages": ocr_pages, "image_count": len(images), "paragraph_count": sum(len(re.findall(r"<p(?:\s|>)", x)) for x in bodies), "full_text_missing": any(("no extractable" in w or "OCR failed" in w or "OCR timed out" in w) for w in warnings), "warnings": warnings}
+        result = {"source": source.name, "output": output.name, "title": book_title, "source_pages": len(doc), "converted_pages": count, "text_pages": sum(bool(doc[i].get_text().strip()) for i in range(count)), "ocr_pages": ocr_pages, "image_count": len(images), "running_margins_removed": margins_removed, "complex_regions_preserved": region_count, "paragraph_count": sum(len(re.findall(r"<p(?:\s|>)", x)) for x in bodies), "full_text_missing": any(("no extractable" in w or "OCR failed" in w or "OCR timed out" in w) for w in warnings), "warnings": warnings}
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf8")
     return result
